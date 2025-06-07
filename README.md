@@ -123,3 +123,55 @@ NEXT_PUBLIC_API_URL=https://your-new-backend-url.com
 
 - `GET /api/message`: Get the integration message
   - Returns: `{"message": "You've successfully integrated the backend!"}`
+
+## Containerization
+Dockerized both backend and frontend using multi-stage builds.
+
+Images are optimized for production and pushed to AWS ECR.
+
+## CI/CD with GitHub Actions
+On push to develop: Lint, test, build, and push Docker images to ECR.
+
+On merge to main: Trigger infrastructure deployment via Terraform.
+
+Full automation from code commit to deployment.
+
+## Infrastructure as Code (Terraform)
+Provisioned:
+
+Custom VPC with subnets & security groups
+
+ECS cluster + services on Fargate
+
+Application Load Balancer with listener rules
+
+IAM roles and policies with least privilege
+
+Secrets stored securely in AWS Secrets Manager
+
+## Monitoring & Alerting
+CloudWatch Dashboard:
+
+CPU Utilization
+
+Memory Usage
+
+Request Count per Target
+
+CloudWatch Alarm:
+
+Triggers SNS email alert if average CPU > 70% over 5 minutes
+
+## Security & IAM
+Scoped IAM roles for ECS tasks and Terraform.
+
+Secure access to secrets via AWS Secrets Manager.
+
+Network-level restrictions using security groups (ALB → ECS only).
+
+## Load Balancing & High Availability
+ALB targets at least 2 ECS Fargate tasks.
+
+Verified request distribution and fault tolerance:
+
+ALB continued to serve traffic with one task stopped (failover works).
