@@ -9,3 +9,7 @@ frontend/.next/
 # Docker
 .dockerignore
 
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
