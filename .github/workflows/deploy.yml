@@ -1,0 +1,59 @@
+name: Deploy to AWS on Merge to Main
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Terraform Deploy
+    runs-on: ubuntu-latest
+
+    environment: production
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python (for Terraform/AWS CLI if needed)
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-west-1
+
+      - name: Set ECR image URLs as ENV variables
+        id: vars
+        run: |
+          BACKEND_IMAGE="767397914878.dkr.ecr.us-west-1.amazonaws.com/devops-assignment/backend:${{ github.sha }}"
+          FRONTEND_IMAGE="767397914878.dkr.ecr.us-west-1.amazonaws.com/devops-assignment/frontend:${{ github.sha }}"
+
+          echo "BACKEND_IMAGE_URL=$BACKEND_IMAGE" >> $GITHUB_ENV
+          echo "FRONTEND_IMAGE_URL=$FRONTEND_IMAGE" >> $GITHUB_ENV
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init
+
+      - name: Terraform Plan
+        working-directory: ./terraform
+        run: |
+          terraform plan \
+            -var="backend_image_url=$BACKEND_IMAGE_URL" \
+            -var="frontend_image_url=$FRONTEND_IMAGE_URL"
+
+      - name: Terraform Apply
+        working-directory: ./terraform
+        run: |
+          terraform apply -auto-approve \
+            -var="backend_image_url=$BACKEND_IMAGE_URL" \
+            -var="frontend_image_url=$FRONTEND_IMAGE_URL"
