@@ -1,0 +1,11 @@
+# Python
+backend/venv/
+backend/app/__pycache__/
+
+# Node.js
+frontend/node_modules/
+frontend/.next/
+
+# Docker
+.dockerignore
+
